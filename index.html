@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
-    <title>Renjay LLM</title>
+    <title>ChatGPT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -540,7 +540,7 @@
             width: 100%;
             min-height: 44px;
             max-height: 200px;
-            padding: 12px 80px 12px 80px;
+            padding: 12px 50px 12px 16px;
             background-color: #f9fafb;
             border: 2px solid #e5e7eb;
             border-radius: 22px;
@@ -563,7 +563,7 @@
 
         .attach-btn {
             position: absolute;
-            left: 12px;
+            right: 44px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -577,25 +577,6 @@
         }
 
         .attach-btn:hover {
-            color: #6b7280;
-        }
-
-        .model-select-btn {
-            position: absolute;
-            left: 44px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #9ca3af;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: color 0.2s;
-        }
-
-        .model-select-btn:hover {
             color: #6b7280;
         }
 
@@ -732,55 +713,6 @@
             line-height: 1.4;
         }
 
-        /* Селектор модели */
-        .model-dropdown {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            min-width: 200px;
-            display: none;
-            margin-bottom: 4px;
-        }
-
-        .model-dropdown.show {
-            display: block;
-        }
-
-        .model-option {
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background-color 0.2s;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .model-option:last-child {
-            border-bottom: none;
-        }
-
-        .model-option:hover {
-            background-color: #f3f4f6;
-        }
-
-        .model-option.selected {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .model-name {
-            font-weight: 500;
-        }
-
-        .model-type {
-            font-size: 11px;
-            color: #6b7280;
-        }
-
         /* Премиум экран */
         .premium-screen {
             position: fixed;
@@ -846,24 +778,22 @@
             width: 100%;
         }
 
-        .subscription-status {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 24px;
+        .premium-header-section {
             text-align: center;
+            margin-bottom: 32px;
         }
 
-        .status-title {
-            font-size: 18px;
-            font-weight: 600;
+        .premium-main-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
             margin-bottom: 8px;
         }
 
-        .status-text {
-            font-size: 14px;
-            opacity: 0.9;
+        .premium-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            line-height: 1.4;
         }
 
         .premium-benefits {
@@ -1127,7 +1057,7 @@
                 <div class="user-info" onclick="showPremiumScreen()">
                     <div class="user-details">
                         <div class="user-avatar">+</div>
-                        <span>Upgrade to Plus</span>
+                        <span>ChatGPT Plus</span>
                     </div>
                 </div>
             </div>
@@ -1151,7 +1081,7 @@
 
             <div class="messages-container" id="messagesContainer">
                 <div class="welcome-screen" id="welcomeScreen">
-                    <h1 class="welcome-title">Renjay LLM</h1>
+                    <h1 class="welcome-title">ChatGPT</h1>
                     <p class="welcome-subtitle">How can I help you today?</p>
                     
                     <div class="example-prompts">
@@ -1181,27 +1111,6 @@
                         <button class="attach-btn" onclick="attachFile()">
                             <i class="fas fa-paperclip"></i>
                         </button>
-                        <button class="model-select-btn" onclick="toggleModelSelector()">
-                            <i class="fas fa-robot"></i>
-                        </button>
-                        <div class="model-dropdown" id="modelDropdown">
-                            <div class="model-option selected" onclick="selectModel('llama-3.1-8b-instant', 'Fast & Lightweight')">
-                                <div class="model-name">Llama 3.1 8B</div>
-                                <div class="model-type">Fast & Lightweight</div>
-                            </div>
-                            <div class="model-option" onclick="selectModel('llama-3.1-70b-versatile', 'Powerful & Versatile')">
-                                <div class="model-name">Llama 3.1 70B</div>
-                                <div class="model-type">Powerful & Versatile</div>
-                            </div>
-                            <div class="model-option" onclick="selectModel('mixtral-8x7b-32768', 'Large Context')">
-                                <div class="model-name">Mixtral 8x7B</div>
-                                <div class="model-type">Large Context</div>
-                            </div>
-                            <div class="model-option" onclick="selectModel('gemma2-9b-it', 'Efficient & Capable')">
-                                <div class="model-name">Gemma2 9B</div>
-                                <div class="model-type">Efficient & Capable</div>
-                            </div>
-                        </div>
                         <textarea 
                             class="message-input" 
                             id="messageInput" 
@@ -1230,13 +1139,13 @@
                 <button class="back-button" onclick="hidePremiumScreen()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
-                <div class="premium-title">Upgrade to Plus</div>
+                <div class="premium-title">ChatGPT Plus</div>
             </div>
 
             <div class="premium-content">
-                <div class="subscription-status" id="subscriptionStatus">
-                    <div class="status-title" id="statusTitle">No Active Subscription</div>
-                    <div class="status-text" id="statusText">Upgrade to unlock all features</div>
+                <div class="premium-header-section">
+                    <div class="premium-main-title">ChatGPT Plus</div>
+                    <div class="premium-subtitle">Get unlimited access to advanced AI capabilities</div>
                 </div>
 
                 <div class="premium-benefits">
@@ -1309,11 +1218,6 @@
         let generationTimer = null;
         let generationStartTime = 0;
         let sidebarCollapsed = false;
-        let currentModel = {
-            name: 'llama-3.1-8b-instant',
-            displayName: 'Llama 3.1 8B',
-            type: 'Fast & Lightweight'
-        };
         let selectedPlan = 'monthly';
         let userSubscription = null;
 
@@ -1323,26 +1227,6 @@
         // Groq API конфигурация
         const GROQ_API_KEY = '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';
         const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
-        // Доступные модели Groq
-        const GROQ_MODELS = {
-            'llama-3.1-8b-instant': {
-                displayName: 'Llama 3.1 8B',
-                type: 'Fast & Lightweight'
-            },
-            'llama-3.1-70b-versatile': {
-                displayName: 'Llama 3.1 70B',
-                type: 'Powerful & Versatile'
-            },
-            'mixtral-8x7b-32768': {
-                displayName: 'Mixtral 8x7B',
-                type: 'Large Context'
-            },
-            'gemma2-9b-it': {
-                displayName: 'Gemma2 9B',
-                type: 'Efficient & Capable'
-            }
-        };
 
         // Планы подписки
         const SUBSCRIPTION_PLANS = {
@@ -1375,7 +1259,6 @@
             const dataToSave = {
                 chats: chats,
                 currentChatId: currentChatId,
-                currentModel: currentModel,
                 userSubscription: userSubscription,
                 timestamp: Date.now()
             };
@@ -1458,11 +1341,6 @@
             if (loadedData) {
                 chats = loadedData.chats || {};
                 currentChatId = loadedData.currentChatId;
-                currentModel = loadedData.currentModel || {
-                    name: 'llama-3.1-8b-instant',
-                    displayName: 'Llama 3.1 8B',
-                    type: 'Fast & Lightweight'
-                };
                 userSubscription = loadedData.userSubscription || null;
                 
                 // Если нет чатов, создаем новый
@@ -1483,16 +1361,7 @@
                 }
                 
                 updateChatHistory();
-                updateSubscriptionStatus();
                 
-                // Обновляем выбранную модель в UI
-                document.querySelectorAll('.model-option').forEach(option => {
-                    option.classList.remove('selected');
-                    const modelName = option.querySelector('.model-name').textContent;
-                    if (modelName === currentModel.displayName) {
-                        option.classList.add('selected');
-                    }
-                });
             } else {
                 // Первый запуск - создаем новый чат
                 createNewChat();
@@ -1516,7 +1385,6 @@
         // Показать/скрыть премиум экран
         function showPremiumScreen() {
             document.getElementById('premiumScreen').classList.add('active');
-            updateSubscriptionStatus();
         }
 
         function hidePremiumScreen() {
@@ -1545,33 +1413,12 @@
             `;
         }
 
-        // Обновление статуса подписки
-        function updateSubscriptionStatus() {
-            const statusTitle = document.getElementById('statusTitle');
-            const statusText = document.getElementById('statusText');
-            
-            if (userSubscription && userSubscription.isActive) {
-                const endDate = new Date(userSubscription.endDate);
-                const now = new Date();
-                const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                
-                statusTitle.textContent = 'Premium Active';
-                statusText.textContent = `Your subscription ends in ${daysLeft} days`;
-                
-                document.getElementById('subscriptionStatus').style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            } else {
-                statusTitle.textContent = 'No Active Subscription';
-                statusText.textContent = 'Upgrade to unlock all features';
-                document.getElementById('subscriptionStatus').style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
-            }
-        }
-
         // Покупка премиума
         function buyPremium() {
             const planData = SUBSCRIPTION_PLANS[selectedPlan];
             
             if (tg && tg.WebApp) {
-                // Закрываем мини-приложение и отправляем данные в бота
+                // Отправляем команду боту для начала оплаты
                 tg.WebApp.sendData(JSON.stringify({
                     action: 'buy_premium',
                     plan: selectedPlan,
@@ -1582,7 +1429,7 @@
                 // Закрываем мини-приложение
                 setTimeout(() => {
                     tg.WebApp.close();
-                }, 500);
+                }, 100);
             } else {
                 // Для тестирования вне Telegram
                 alert(`Purchasing ${selectedPlan} plan for ${planData.price} stars`);
@@ -1648,34 +1495,6 @@
             menu.classList.toggle('show');
         }
 
-        // Переключение селектора модели
-        function toggleModelSelector() {
-            const dropdown = document.getElementById('modelDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Выбор модели
-        function selectModel(modelId, type) {
-            if (GROQ_MODELS[modelId]) {
-                currentModel = {
-                    name: modelId,
-                    displayName: GROQ_MODELS[modelId].displayName,
-                    type: type
-                };
-                
-                // Обновить выбранную опцию
-                document.querySelectorAll('.model-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                event.target.closest('.model-option').classList.add('selected');
-                
-                document.getElementById('modelDropdown').classList.remove('show');
-                
-                // Сохраняем выбор модели
-                saveAllData();
-            }
-        }
-
         // Начать новый чат
         function startNewChat() {
             createNewChat();
@@ -1714,7 +1533,7 @@
                 // Показать приветственный экран
                 messagesContainer.innerHTML = `
                     <div class="welcome-screen" id="welcomeScreen">
-                        <h1 class="welcome-title">Renjay LLM</h1>
+                        <h1 class="welcome-title">ChatGPT</h1>
                         <p class="welcome-subtitle">How can I help you today?</p>
                         
                         <div class="example-prompts">
@@ -1856,7 +1675,10 @@
             if (!message || isTyping) return;
 
             // Скрыть приветственный экран
-            document.getElementById('welcomeScreen').style.display = 'none';
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'none';
+            }
 
             // Добавить сообщение пользователя
             addMessage('user', message);
@@ -1895,7 +1717,7 @@
                         'Authorization': `Bearer ${GROQ_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: currentModel.name,
+                        model: 'llama-3.1-8b-instant',
                         messages: [
                             ...chats[currentChatId].messages.map(msg => ({
                                 role: msg.role,
@@ -2195,9 +2017,9 @@
             
             // Закрытие меню при клике вне его
             document.addEventListener('click', function(event) {
-                const menus = document.querySelectorAll('.chat-menu-dropdown, .user-menu-dropdown, .model-dropdown');
+                const menus = document.querySelectorAll('.chat-menu-dropdown, .user-menu-dropdown');
                 menus.forEach(menu => {
-                    if (!menu.closest('.chat-menu, .user-menu, .input-wrapper')?.contains(event.target)) {
+                    if (!menu.closest('.chat-menu, .user-menu')?.contains(event.target)) {
                         menu.classList.remove('show');
                     }
                 });
