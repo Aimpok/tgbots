@@ -6,6 +6,7 @@
     <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
     <title>Renjay LLM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -1031,8 +1032,11 @@
             type: 'Fast & Lightweight'
         };
 
+        // Telegram Web App объект
+        let tg = null;
+        
         // Groq API конфигурация
-        const GROQ_API_KEY = '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'; // Replace with your API key
+        const GROQ_API_KEY = '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';
         const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
         // Доступные модели Groq
@@ -1055,8 +1059,147 @@
             }
         };
 
-        // Инициализация
+        // Инициализация Telegram Web App
+        function initTelegramWebApp() {
+            tg = window.Telegram.WebApp;
+            
+            // Расширяем приложение на весь экран
+            tg.expand();
+            
+            // Устанавливаем цвет фона
+            tg.setHeaderColor('#ffffff');
+            tg.setBackgroundColor('#ffffff');
+            
+            // Загружаем сохраненные данные
+            loadSavedData();
+            
+            // Обработчик для сохранения данных при закрытии
+            tg.onEvent('viewportChanged', saveDataToTelegram);
+            window.addEventListener('beforeunload', saveDataToTelegram);
+        }
+
+        // Сохранение данных в Telegram Cloud Storage
+        function saveDataToTelegram() {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userId = tg.initDataUnsafe.user.id.toString();
+                const dataToSave = {
+                    chats: chats,
+                    currentChatId: currentChatId,
+                    currentModel: currentModel,
+                    timestamp: Date.now()
+                };
+                
+                // Используем Telegram Cloud Storage
+                tg.CloudStorage.setItem(`user_${userId}_data`, JSON.stringify(dataToSave), (error, result) => {
+                    if (error) {
+                        console.error('Error saving data to Telegram:', error);
+                        // Fallback: сохраняем в localStorage
+                        try {
+                            localStorage.setItem(`telegram_chat_data_${userId}`, JSON.stringify(dataToSave));
+                        } catch (e) {
+                            console.error('Error saving to localStorage:', e);
+                        }
+                    } else {
+                        console.log('Data saved to Telegram Cloud Storage');
+                    }
+                });
+            } else {
+                // Fallback для случая, когда нет доступа к Telegram API
+                try {
+                    localStorage.setItem('local_chat_data', JSON.stringify({
+                        chats: chats,
+                        currentChatId: currentChatId,
+                        currentModel: currentModel
+                    }));
+                } catch (e) {
+                    console.error('Error saving to localStorage:', e);
+                }
+            }
+        }
+
+        // Загрузка сохраненных данных
+        function loadSavedData() {
+            let loadedData = null;
+            
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userId = tg.initDataUnsafe.user.id.toString();
+                
+                // Пробуем загрузить из Telegram Cloud Storage
+                tg.CloudStorage.getItem(`user_${userId}_data`, (error, data) => {
+                    if (!error && data) {
+                        try {
+                            loadedData = JSON.parse(data);
+                            console.log('Data loaded from Telegram Cloud Storage');
+                        } catch (e) {
+                            console.error('Error parsing Telegram data:', e);
+                        }
+                    }
+                    
+                    // Если не получилось из Telegram, пробуем localStorage
+                    if (!loadedData) {
+                        try {
+                            const localData = localStorage.getItem(`telegram_chat_data_${userId}`);
+                            if (localData) {
+                                loadedData = JSON.parse(localData);
+                                console.log('Data loaded from localStorage (Telegram)');
+                            }
+                        } catch (e) {
+                            console.error('Error loading from localStorage:', e);
+                        }
+                    }
+                    
+                    applyLoadedData(loadedData);
+                });
+            } else {
+                // Fallback: загружаем из localStorage
+                try {
+                    const localData = localStorage.getItem('local_chat_data');
+                    if (localData) {
+                        loadedData = JSON.parse(localData);
+                        console.log('Data loaded from localStorage');
+                    }
+                } catch (e) {
+                    console.error('Error loading from localStorage:', e);
+                }
+                applyLoadedData(loadedData);
+            }
+        }
+
+        // Применение загруженных данных
+        function applyLoadedData(loadedData) {
+            if (loadedData && loadedData.chats) {
+                chats = loadedData.chats;
+                currentChatId = loadedData.currentChatId || 1;
+                currentModel = loadedData.currentModel || {
+                    name: 'llama-3.1-8b-instant',
+                    displayName: 'Llama 3.1 8B',
+                    type: 'Fast & Lightweight'
+                };
+                
+                updateChatHistory();
+                loadChat(currentChatId);
+                
+                // Обновляем выбранную модель в UI
+                document.querySelectorAll('.model-option').forEach(option => {
+                    option.classList.remove('selected');
+                    const modelName = option.querySelector('.model-name').textContent;
+                    if (modelName === currentModel.displayName) {
+                        option.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализируем Telegram Web App
+            if (window.Telegram && window.Telegram.WebApp) {
+                initTelegramWebApp();
+            } else {
+                console.log('Running outside Telegram, using localStorage');
+                loadSavedData();
+            }
+            
             adjustTextareaHeight(document.getElementById('messageInput'));
             
             // Закрытие меню при клике вне его
@@ -1158,6 +1301,9 @@
                 event.target.closest('.model-option').classList.add('selected');
                 
                 document.getElementById('modelDropdown').classList.remove('show');
+                
+                // Сохраняем выбор модели
+                saveDataToTelegram();
             }
         }
 
@@ -1167,6 +1313,7 @@
             if (newName && newName.trim()) {
                 chats[chatId].title = newName.trim();
                 updateChatHistory();
+                saveDataToTelegram();
             }
             document.getElementById(`menu-${chatId}`).classList.remove('show');
         }
@@ -1188,6 +1335,7 @@
             }
             
             updateChatHistory();
+            saveDataToTelegram();
             
             // Закрыть меню
             const menu = document.getElementById(`menu-${chatId}`);
@@ -1271,6 +1419,9 @@
                 updateChatHistory();
             }
 
+            // Сохраняем после добавления сообщения пользователя
+            saveDataToTelegram();
+
             // Показать индикатор печатания и эффект генерации
             showGeneratingEffect();
             showTypingIndicator();
@@ -1314,6 +1465,9 @@
                     content: aiResponse,
                     model: currentModel.name
                 });
+
+                // Сохраняем после получения ответа от AI
+                saveDataToTelegram();
 
             } catch (error) {
                 console.error('Error calling Groq API:', error);
@@ -1376,6 +1530,8 @@
                 content: 'Generation stopped by user.',
                 model: currentModel.name
             });
+            
+            saveDataToTelegram();
         }
 
         // Добавление сообщения в чат
@@ -1593,6 +1749,7 @@
             `;
             
             updateChatHistory();
+            saveDataToTelegram();
             
             // Закрыть боковую панель на мобильных
             if (window.innerWidth <= 768) {
