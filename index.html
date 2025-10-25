@@ -1413,12 +1413,12 @@
             `;
         }
 
-        // Покупка премиума
+        // Покупка премиума - ОБНОВЛЕННАЯ ФУНКЦИЯ
         function buyPremium() {
             const planData = SUBSCRIPTION_PLANS[selectedPlan];
             
             if (tg && tg.WebApp) {
-                // Отправляем команду боту для начала оплаты
+                // Отправляем данные в бота
                 tg.WebApp.sendData(JSON.stringify({
                     action: 'buy_premium',
                     plan: selectedPlan,
@@ -1426,13 +1426,19 @@
                     months: planData.months
                 }));
                 
-                // Закрываем мини-приложение
+                // Закрываем мини-приложение сразу после отправки данных
                 setTimeout(() => {
                     tg.WebApp.close();
-                }, 100);
+                }, 300); // Небольшая задержка для гарантированной отправки данных
             } else {
                 // Для тестирования вне Telegram
                 alert(`Purchasing ${selectedPlan} plan for ${planData.price} stars`);
+                console.log('Purchase data:', {
+                    action: 'buy_premium',
+                    plan: selectedPlan,
+                    price: planData.price,
+                    months: planData.months
+                });
             }
         }
 
