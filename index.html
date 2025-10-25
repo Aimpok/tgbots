@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,13 +80,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-
-        .sidebar-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            transition: opacity 0.2s;
         }
 
         .collapse-btn {
@@ -201,13 +194,9 @@
             padding: 4px 6px;
             border-radius: 4px;
             font-size: 14px;
-            opacity: 0;
+            opacity: 1;
             transition: opacity 0.2s;
             line-height: 1;
-        }
-
-        .chat-item:hover .chat-menu-btn {
-            opacity: 1;
         }
 
         .chat-menu-btn:hover {
@@ -279,14 +268,14 @@
         .user-avatar {
             width: 24px;
             height: 24px;
-            background-color: #e5e7eb;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: bold;
-            color: #374151;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            color: white;
         }
 
         .user-menu {
@@ -444,7 +433,7 @@
 
         .message-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 8px;
         }
 
@@ -458,11 +447,9 @@
             font-size: 12px;
             font-weight: bold;
             flex-shrink: 0;
-        }
-
-        .assistant-message .message-avatar {
             background-color: #6b7280;
             color: #ffffff;
+            margin-top: 4px;
         }
 
         .message-content {
@@ -486,7 +473,7 @@
 
         .message-actions {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             margin-top: 8px;
             opacity: 0;
             transition: opacity 0.2s;
@@ -501,16 +488,16 @@
             border: none;
             color: #6b7280;
             cursor: pointer;
-            padding: 6px 8px;
+            padding: 4px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.2s;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
         }
 
         .action-btn:hover {
@@ -527,7 +514,7 @@
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
@@ -837,7 +824,7 @@
             }
 
             .message-bubble {
-                max-width: 85%;
+                max-width: 90%;
             }
 
             .welcome-screen {
@@ -854,6 +841,10 @@
 
             .expand-btn {
                 display: none !important;
+            }
+
+            .chat-menu-btn {
+                opacity: 1;
             }
         }
 
@@ -902,12 +893,23 @@
             top: 20px;
             right: 20px;
             padding: 12px 20px;
-            background-color: #dc2626;
-            color: white;
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             display: none;
+            max-width: 400px;
+        }
+
+        .api-key-input {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 8px;
         }
     </style>
 </head>
@@ -916,27 +918,23 @@
         <!-- Боковая панель -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-title">Renjay LLM</div>
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <i class="fas fa-plus"></i>
+                    <span>New Chat</span>
+                </button>
                 <button class="collapse-btn" onclick="toggleSidebar()">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
             
-            <div class="sidebar-header">
-                <button class="new-chat-btn" onclick="startNewChat()">
-                    <i class="fas fa-plus"></i>
-                    <span>Новый чат</span>
-                </button>
-            </div>
-            
             <div class="chat-history" id="chatHistory">
                 <div class="chat-item active" onclick="selectChat(this, 1)">
-                    <div class="chat-title">Новый чат</div>
+                    <div class="chat-title">New Chat</div>
                     <div class="chat-menu">
                         <button class="chat-menu-btn" onclick="toggleChatMenu(event, 1)">⋮</button>
                         <div class="chat-menu-dropdown" id="menu-1">
-                            <div class="chat-menu-item" onclick="renameChat(1)">Переименовать</div>
-                            <div class="chat-menu-item delete" onclick="deleteChat(1)">Удалить</div>
+                            <div class="chat-menu-item" onclick="renameChat(1)">Rename</div>
+                            <div class="chat-menu-item delete" onclick="deleteChat(1)">Delete</div>
                         </div>
                     </div>
                 </div>
@@ -945,14 +943,14 @@
             <div class="sidebar-footer">
                 <div class="user-info" onclick="toggleUserMenu(event)">
                     <div class="user-details">
-                        <div class="user-avatar">П</div>
-                        <span>Пользователь</span>
+                        <div class="user-avatar">+</div>
+                        <span>Upgrade to Plus</span>
                     </div>
                     <div class="user-menu">
                         <button class="user-menu-btn">⋮</button>
                         <div class="user-menu-dropdown" id="userMenu">
-                            <div class="user-menu-item" onclick="openSettings()">Настройки</div>
-                            <div class="user-menu-item" onclick="logout()">Выйти</div>
+                            <div class="user-menu-item" onclick="openSettings()">Settings</div>
+                            <div class="user-menu-item" onclick="logout()">Logout</div>
                         </div>
                     </div>
                 </div>
@@ -979,24 +977,24 @@
             <div class="messages-container" id="messagesContainer">
                 <div class="welcome-screen" id="welcomeScreen">
                     <h1 class="welcome-title">Renjay LLM</h1>
-                    <p class="welcome-subtitle">Как я могу вам помочь сегодня?</p>
+                    <p class="welcome-subtitle">How can I help you today?</p>
                     
                     <div class="example-prompts">
-                        <div class="example-prompt" onclick="sendExamplePrompt('Объясни квантовую физику простыми словами')">
-                            <h3>Объяснение</h3>
-                            <p>Объясни квантовую физику простыми словами</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Explain quantum physics in simple terms')">
+                            <h3>Explanation</h3>
+                            <p>Explain quantum physics in simple terms</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Напиши код для сортировки массива на JavaScript')">
-                            <h3>Программирование</h3>
-                            <p>Напиши код для сортировки массива на JavaScript</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Write code for sorting an array in JavaScript')">
+                            <h3>Programming</h3>
+                            <p>Write code for sorting an array in JavaScript</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Придумай креативную идею для стартапа')">
-                            <h3>Творчество</h3>
-                            <p>Придумай креативную идею для стартапа</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Come up with a creative startup idea')">
+                            <h3>Creativity</h3>
+                            <p>Come up with a creative startup idea</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Создай изображение заката над океаном')">
-                            <h3>Создать изображение</h3>
-                            <p>Создай изображение заката над океаном</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Create an image of a sunset over the ocean')">
+                            <h3>Image Creation</h3>
+                            <p>Create an image of a sunset over the ocean</p>
                         </div>
                     </div>
                 </div>
@@ -1032,7 +1030,7 @@
                         <textarea 
                             class="message-input" 
                             id="messageInput" 
-                            placeholder="Отправьте сообщение..."
+                            placeholder="Send a message..."
                             rows="1"
                             onkeydown="handleKeyDown(event)"
                             oninput="adjustTextareaHeight(this)"
@@ -1059,7 +1057,7 @@
         let currentChatId = 1;
         let chats = {
             1: {
-                title: 'Новый чат',
+                title: 'New Chat',
                 messages: []
             }
         };
@@ -1074,7 +1072,7 @@
         };
 
         // Groq API конфигурация
-        const GROQ_API_KEY = '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'; // Замените на ваш API ключ
+        const GROQ_API_KEY = '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'; // Replace with your API key
         const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
         // Доступные модели Groq
@@ -1116,7 +1114,9 @@
         function showNotification(message, isError = true) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
-            notification.style.backgroundColor = isError ? '#dc2626' : '#059669';
+            notification.style.backgroundColor = isError ? '#fee2e2' : '#d1fae5';
+            notification.style.color = isError ? '#dc2626' : '#059669';
+            notification.style.borderColor = isError ? '#fecaca' : '#a7f3d0';
             notification.style.display = 'block';
             
             setTimeout(() => {
@@ -1212,13 +1212,13 @@
                 event.target.closest('.model-option').classList.add('selected');
                 
                 document.getElementById('modelDropdown').classList.remove('show');
-                showNotification(`Модель изменена на: ${GROQ_MODELS[modelId].displayName}`, false);
+                showNotification(`Model changed to: ${GROQ_MODELS[modelId].displayName}`, false);
             }
         }
 
         // Переименование чата
         function renameChat(chatId) {
-            const newName = prompt('Введите новое название чата:', chats[chatId].title);
+            const newName = prompt('Enter new chat name:', chats[chatId].title);
             if (newName && newName.trim()) {
                 chats[chatId].title = newName.trim();
                 updateChatHistory();
@@ -1229,7 +1229,7 @@
         // Удаление чата
         function deleteChat(chatId) {
             if (Object.keys(chats).length === 1) {
-                alert('Нельзя удалить последний чат');
+                alert('Cannot delete the last chat');
                 return;
             }
             
@@ -1251,25 +1251,25 @@
 
         // Настройки
         function openSettings() {
-            const apiKey = prompt('Введите ваш Groq API ключ:', GROQ_API_KEY);
+            const apiKey = prompt('Enter your Groq API key:', GROQ_API_KEY);
             if (apiKey) {
                 // В реальном приложении здесь бы сохраняли API ключ
-                showNotification('API ключ обновлен', false);
+                showNotification('API key updated', false);
             }
             document.getElementById('userMenu')?.classList.remove('show');
         }
 
         // Выход
         function logout() {
-            if (confirm('Вы уверены, что хотите выйти?')) {
-                alert('Выход из системы');
+            if (confirm('Are you sure you want to log out?')) {
+                alert('Logged out');
             }
             document.getElementById('userMenu').classList.remove('show');
         }
 
         // Прикрепить файл
         function attachFile() {
-            alert('Прикрепление файлов (в разработке)');
+            alert('File attachment (in development)');
         }
 
         // Автоматическое изменение высоты textarea
@@ -1353,7 +1353,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Ошибка API: ${response.status}`);
+                    throw new Error(`API Error: ${response.status}`);
                 }
 
                 const data = await response.json();
@@ -1371,21 +1371,14 @@
                 });
 
             } catch (error) {
-                console.error('Ошибка при запросе к Groq API:', error);
+                console.error('Error calling Groq API:', error);
                 hideGeneratingEffect();
                 hideTypingIndicator();
                 
-                // Fallback на локальную генерацию
-                const response = generateResponse(message);
-                addMessage('assistant', response);
+                // Показать сообщение об ошибке
+                showNotification('Failed to send message. Please try using VPN or check your connection.', true);
                 
-                chats[currentChatId].messages.push({
-                    role: 'assistant',
-                    content: response,
-                    model: currentModel.name
-                });
-                
-                showNotification('Ошибка подключения к API. Используется локальная генерация.');
+                // Не добавляем fallback сообщение
             }
         }
 
@@ -1433,11 +1426,11 @@
             hideTypingIndicator();
             
             // Добавить сообщение о прерывании
-            addMessage('assistant', 'Генерация остановлена пользователем.');
+            addMessage('assistant', 'Generation stopped by user.');
             
             chats[currentChatId].messages.push({
                 role: 'assistant',
-                content: 'Генерация остановлена пользователем.',
+                content: 'Generation stopped by user.',
                 model: currentModel.name
             });
         }
@@ -1458,7 +1451,8 @@
             if (role === 'assistant') {
                 const avatar = document.createElement('div');
                 avatar.className = 'message-avatar';
-                avatar.textContent = 'AI';
+                // В реальном приложении здесь бы использовалась картинка
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
                 messageHeader.appendChild(avatar);
             }
             
@@ -1480,15 +1474,11 @@
                 actionsDiv.innerHTML = `
                     <button class="action-btn" onclick="copyMessage(this)">
                         <i class="fas fa-copy"></i>
-                        <div class="tooltip">Копировать</div>
-                    </button>
-                    <button class="action-btn" onclick="regenerateMessage(this)">
-                        <i class="fas fa-redo"></i>
-                        <div class="tooltip">Перегенерировать</div>
+                        <div class="tooltip">Copy</div>
                     </button>
                     <button class="action-btn" onclick="downloadMessage(this)">
                         <i class="fas fa-download"></i>
-                        <div class="tooltip">Скачать</div>
+                        <div class="tooltip">Download</div>
                     </button>
                 `;
                 
@@ -1506,26 +1496,11 @@
             navigator.clipboard.writeText(messageContent).then(() => {
                 const tooltip = btn.querySelector('.tooltip');
                 const originalText = tooltip.textContent;
-                tooltip.textContent = 'Скопировано!';
+                tooltip.textContent = 'Copied!';
                 setTimeout(() => {
                     tooltip.textContent = originalText;
                 }, 1000);
             });
-        }
-
-        // Перегенерировать сообщение
-        function regenerateMessage(btn) {
-            const messageDiv = btn.closest('.message');
-            const messageContent = messageDiv.querySelector('.message-content');
-            
-            // Показать индикатор загрузки
-            messageContent.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            
-            // В реальном приложении здесь бы отправлялся запрос к API
-            setTimeout(() => {
-                const newResponse = generateResponse('regenerate');
-                messageContent.innerHTML = formatMessage(newResponse);
-            }, 2000);
         }
 
         // Скачать сообщение
@@ -1569,7 +1544,7 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
-            avatar.textContent = 'AI';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
             
             const typingContent = document.createElement('div');
             typingContent.className = 'message-content';
@@ -1592,38 +1567,11 @@
             }
         }
 
-        // Генерация ответа (симуляция ИИ)
-        function generateResponse(message) {
-            const responses = [
-                "Это очень интересный вопрос! Позвольте мне подумать над этим и дать вам развернутый ответ.",
-                "Спасибо за ваш вопрос. Вот что я думаю по этому поводу...",
-                "Отличный вопрос! Давайте разберем это пошагово.",
-                "Я понимаю, что вас интересует. Вот мой анализ этой темы.",
-                "Это сложная тема, но я постараюсь объяснить её максимально понятно."
-            ];
-            
-            const codeResponses = [
-                "Вот пример кода, который может вам помочь:\n\n```javascript\nfunction example() {\n    console.log('Привет, мир!');\n}\n```\n\nЭтот код демонстрирует базовый синтаксис.",
-                "Для решения этой задачи можно использовать следующий подход:\n\n```python\ndef solve_problem():\n    return 'Решение найдено'\n```"
-            ];
-            
-            if (message.toLowerCase().includes('код') || message.toLowerCase().includes('программ')) {
-                return codeResponses[Math.floor(Math.random() * codeResponses.length)];
-            }
-            
-            if (message.toLowerCase().includes('изображение') || message.toLowerCase().includes('создай')) {
-                return "Я создал изображение по вашему запросу. К сожалению, в данной демо-версии я не могу отобразить реальные изображения, но в полной версии здесь будет сгенерированная картинка.";
-            }
-            
-            return responses[Math.floor(Math.random() * responses.length)] + 
-                   "\n\nЕсли у вас есть дополнительные вопросы, не стесняйтесь спрашивать!";
-        }
-
         // Начать новый чат
         function startNewChat() {
             const newChatId = Date.now();
             chats[newChatId] = {
-                title: 'Новый чат',
+                title: 'New Chat',
                 messages: []
             };
             
@@ -1634,24 +1582,24 @@
             messagesContainer.innerHTML = `
                 <div class="welcome-screen" id="welcomeScreen">
                     <h1 class="welcome-title">Renjay LLM</h1>
-                    <p class="welcome-subtitle">Как я могу вам помочь сегодня?</p>
+                    <p class="welcome-subtitle">How can I help you today?</p>
                     
                     <div class="example-prompts">
-                        <div class="example-prompt" onclick="sendExamplePrompt('Объясни квантовую физику простыми словами')">
-                            <h3>Объяснение</h3>
-                            <p>Объясни квантовую физику простыми словами</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Explain quantum physics in simple terms')">
+                            <h3>Explanation</h3>
+                            <p>Explain quantum physics in simple terms</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Напиши код для сортировки массива на JavaScript')">
-                            <h3>Программирование</h3>
-                            <p>Напиши код для сортировки массива на JavaScript</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Write code for sorting an array in JavaScript')">
+                            <h3>Programming</h3>
+                            <p>Write code for sorting an array in JavaScript</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Придумай креативную идею для стартапа')">
-                            <h3>Творчество</h3>
-                            <p>Придумай креативную идею для стартапа</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Come up with a creative startup idea')">
+                            <h3>Creativity</h3>
+                            <p>Come up with a creative startup idea</p>
                         </div>
-                        <div class="example-prompt" onclick="sendExamplePrompt('Создай изображение заката над океаном')">
-                            <h3>Создать изображение</h3>
-                            <p>Создай изображение заката над океаном</p>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Create an image of a sunset over the ocean')">
+                            <h3>Image Creation</h3>
+                            <p>Create an image of a sunset over the ocean</p>
                         </div>
                     </div>
                 </div>
@@ -1694,24 +1642,24 @@
                 messagesContainer.innerHTML = `
                     <div class="welcome-screen" id="welcomeScreen">
                         <h1 class="welcome-title">Renjay LLM</h1>
-                        <p class="welcome-subtitle">Как я могу вам помочь сегодня?</p>
+                        <p class="welcome-subtitle">How can I help you today?</p>
                         
                         <div class="example-prompts">
-                            <div class="example-prompt" onclick="sendExamplePrompt('Объясни квантовую физику простыми словами')">
-                                <h3>Объяснение</h3>
-                                <p>Объясни квантовую физику простыми словами</p>
+                            <div class="example-prompt" onclick="sendExamplePrompt('Explain quantum physics in simple terms')">
+                                <h3>Explanation</h3>
+                                <p>Explain quantum physics in simple terms</p>
                             </div>
-                            <div class="example-prompt" onclick="sendExamplePrompt('Напиши код для сортировки массива на JavaScript')">
-                                <h3>Программирование</h3>
-                                <p>Напиши код для сортировки массива на JavaScript</p>
+                            <div class="example-prompt" onclick="sendExamplePrompt('Write code for sorting an array in JavaScript')">
+                                <h3>Programming</h3>
+                                <p>Write code for sorting an array in JavaScript</p>
                             </div>
-                            <div class="example-prompt" onclick="sendExamplePrompt('Придумай креативную идею для стартапа')">
-                                <h3>Творчество</h3>
-                                <p>Придумай креативную идею для стартапа</p>
+                            <div class="example-prompt" onclick="sendExamplePrompt('Come up with a creative startup idea')">
+                                <h3>Creativity</h3>
+                                <p>Come up with a creative startup idea</p>
                             </div>
-                            <div class="example-prompt" onclick="sendExamplePrompt('Создай изображение заката над океаном')">
-                                <h3>Создать изображение</h3>
-                                <p>Создай изображение заката над океаном</p>
+                            <div class="example-prompt" onclick="sendExamplePrompt('Create an image of a sunset over the ocean')">
+                                <h3>Image Creation</h3>
+                                <p>Create an image of a sunset over the ocean</p>
                             </div>
                         </div>
                     </div>
@@ -1745,8 +1693,8 @@
                     <div class="chat-menu">
                         <button class="chat-menu-btn" onclick="toggleChatMenu(event, ${id})">⋮</button>
                         <div class="chat-menu-dropdown" id="menu-${id}">
-                            <div class="chat-menu-item" onclick="renameChat(${id})">Переименовать</div>
-                            <div class="chat-menu-item delete" onclick="deleteChat(${id})">Удалить</div>
+                            <div class="chat-menu-item" onclick="renameChat(${id})">Rename</div>
+                            <div class="chat-menu-item delete" onclick="deleteChat(${id})">Delete</div>
                         </div>
                     </div>
                 `;
