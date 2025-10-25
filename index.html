@@ -875,6 +875,27 @@
                 transform: translateY(0);
             }
         }
+
+        /* VPN рекомендация */
+        .vpn-suggestion {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 16px 24px;
+            font-size: 14px;
+            color: #0369a1;
+        }
+
+        .vpn-suggestion a {
+            color: #0284c7;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .vpn-suggestion a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -935,6 +956,14 @@
                 <button class="menu-toggle" onclick="toggleSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
+            </div>
+
+            <!-- VPN рекомендация -->
+            <div class="vpn-suggestion" id="vpnSuggestion">
+                <strong>Для работы в РФ:</strong> Рекомендуем использовать VPN. Бесплатные варианты: 
+                <a href="#" onclick="showFreeVPNs()">ProtonVPN</a>, 
+                <a href="#" onclick="showFreeVPNs()">Windscribe</a>
+                <button onclick="hideVPNSuggestion()" style="margin-left: 10px; background: none; border: none; color: #666; cursor: pointer;">✕</button>
             </div>
 
             <div class="messages-container" id="messagesContainer">
@@ -1031,9 +1060,17 @@
             type: 'Fast & Lightweight'
         };
 
+        // Альтернативные API эндпоинты для обхода блокировок
+        const API_ENDPOINTS = [
+            'https://api.groq.com/openai/v1/chat/completions',
+            'https://groq-api.proxy.workers.dev/openai/v1/chat/completions',
+            'https://groq.deta.dev/openai/v1/chat/completions'
+        ];
+
+        let currentEndpointIndex = 0;
+
         // Groq API конфигурация
-        const GROQ_API_KEY = 'YOUR_GROQ_API_KEY'; // Replace with your API key
-        const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+        const GROQ_API_KEY = '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'; // Пользователь должен ввести свой ключ
 
         // Доступные модели Groq
         const GROQ_MODELS = {
@@ -1059,6 +1096,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             adjustTextareaHeight(document.getElementById('messageInput'));
             
+            // Проверяем доступность API
+            checkAPIStatus();
+            
             // Закрытие меню при клике вне его
             document.addEventListener('click', function(event) {
                 const menus = document.querySelectorAll('.chat-menu-dropdown, .user-menu-dropdown, .model-dropdown');
@@ -1069,6 +1109,60 @@
                 });
             });
         });
+
+        // Проверка статуса API
+        async function checkAPIStatus() {
+            const apiKey = localStorage.getItem('groq_api_key');
+            if (!apiKey) {
+                showVPNSuggestion();
+                return;
+            }
+
+            try {
+                const response = await fetch(API_ENDPOINTS[currentEndpointIndex], {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        messages: [{role: 'user', content: 'test'}],
+                        max_tokens: 5
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('vpnSuggestion').style.display = 'none';
+                } else {
+                    showVPNSuggestion();
+                }
+            } catch (error) {
+                showVPNSuggestion();
+                rotateEndpoint();
+            }
+        }
+
+        // Ротация эндпоинтов при ошибках
+        function rotateEndpoint() {
+            currentEndpointIndex = (currentEndpointIndex + 1) % API_ENDPOINTS.length;
+        }
+
+        // Показать рекомендацию по VPN
+        function showVPNSuggestion() {
+            document.getElementById('vpnSuggestion').style.display = 'block';
+        }
+
+        // Скрыть рекомендацию по VPN
+        function hideVPNSuggestion() {
+            document.getElementById('vpnSuggestion').style.display = 'none';
+        }
+
+        // Показать бесплатные VPN
+        function showFreeVPNs() {
+            alert('Бесплатные VPN для обхода блокировок:\n\n• ProtonVPN - 3 бесплатных страны\n• Windscribe - 10GB в месяц бесплатно\n• TunnelBear - 500MB в месяц бесплатно\n\nУстановите любое из этих приложений для доступа к API.');
+            return false;
+        }
 
         // Переключение боковой панели
         function toggleSidebar() {
@@ -1196,10 +1290,12 @@
 
         // Настройки
         function openSettings() {
-            const apiKey = prompt('Enter your Groq API key:', GROQ_API_KEY);
-            if (apiKey) {
-                // В реальном приложении здесь бы сохраняли API ключ
-                alert('API key updated');
+            const currentKey = localStorage.getItem('groq_api_key') || '';
+            const apiKey = prompt('Enter your Groq API key:', currentKey);
+            if (apiKey !== null) {
+                localStorage.setItem('groq_api_key', apiKey);
+                alert('API key saved successfully!');
+                checkAPIStatus();
             }
             document.getElementById('userMenu')?.classList.remove('show');
         }
@@ -1207,7 +1303,8 @@
         // Выход
         function logout() {
             if (confirm('Are you sure you want to log out?')) {
-                alert('Logged out');
+                localStorage.removeItem('groq_api_key');
+                alert('Logged out and API key removed');
             }
             document.getElementById('userMenu').classList.remove('show');
         }
@@ -1240,12 +1337,20 @@
             sendMessage();
         }
 
-        // Отправка сообщения через Groq API
+        // Отправка сообщения через Groq API с обходом блокировок
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message || isTyping) return;
+
+            // Проверяем API ключ
+            const apiKey = localStorage.getItem('groq_api_key');
+            if (!apiKey) {
+                addErrorMessage('Please set your API key in Settings first');
+                openSettings();
+                return;
+            }
 
             // Скрыть приветственный экран
             document.getElementById('welcomeScreen').style.display = 'none';
@@ -1275,54 +1380,82 @@
             showGeneratingEffect();
             showTypingIndicator();
             
-            try {
-                // Отправка запроса к Groq API
-                const response = await fetch(GROQ_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GROQ_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: currentModel.name,
-                        messages: [
-                            ...chats[currentChatId].messages.map(msg => ({
-                                role: msg.role,
-                                content: msg.content
-                            }))
-                        ],
-                        stream: false,
-                        temperature: 0.7,
-                        max_tokens: 1024
-                    })
-                });
+            // Пытаемся отправить запрос через разные эндпоинты
+            let success = false;
+            let attempts = 0;
+            const maxAttempts = API_ENDPOINTS.length;
 
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
+            while (!success && attempts < maxAttempts) {
+                try {
+                    const endpoint = API_ENDPOINTS[currentEndpointIndex];
+                    console.log(`Trying endpoint: ${endpoint}`);
+                    
+                    const response = await fetchWithTimeout(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: currentModel.name,
+                            messages: [
+                                ...chats[currentChatId].messages.map(msg => ({
+                                    role: msg.role,
+                                    content: msg.content
+                                }))
+                            ],
+                            stream: false,
+                            temperature: 0.7,
+                            max_tokens: 1024
+                        })
+                    }, 10000); // 10 секунд таймаут
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const aiResponse = data.choices[0].message.content;
+
+                    hideGeneratingEffect();
+                    hideTypingIndicator();
+                    
+                    addMessage('assistant', aiResponse);
+                    
+                    chats[currentChatId].messages.push({
+                        role: 'assistant',
+                        content: aiResponse,
+                        model: currentModel.name
+                    });
+
+                    success = true;
+                    document.getElementById('vpnSuggestion').style.display = 'none';
+
+                } catch (error) {
+                    console.error(`Attempt ${attempts + 1} failed:`, error);
+                    attempts++;
+                    rotateEndpoint();
+                    
+                    if (attempts >= maxAttempts) {
+                        hideGeneratingEffect();
+                        hideTypingIndicator();
+                        
+                        // Добавляем сообщение об ошибке как сообщение бота
+                        addErrorMessage('Connection failed. Please check:\n1. Your VPN is active\n2. API key is correct\n3. Internet connection');
+                        showVPNSuggestion();
+                    }
                 }
-
-                const data = await response.json();
-                const aiResponse = data.choices[0].message.content;
-
-                hideGeneratingEffect();
-                hideTypingIndicator();
-                
-                addMessage('assistant', aiResponse);
-                
-                chats[currentChatId].messages.push({
-                    role: 'assistant',
-                    content: aiResponse,
-                    model: currentModel.name
-                });
-
-            } catch (error) {
-                console.error('Error calling Groq API:', error);
-                hideGeneratingEffect();
-                hideTypingIndicator();
-                
-                // Добавляем сообщение об ошибке как сообщение бота
-                addErrorMessage('Failed to send message. Please try using VPN or check your connection.');
             }
+        }
+
+        // Fetch с таймаутом
+        function fetchWithTimeout(url, options, timeout = 10000) {
+            return Promise.race([
+                fetch(url, options),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Request timeout')), timeout)
+                )
+            ]);
         }
 
         // Показать эффект генерации
