@@ -45,33 +45,10 @@
         .sidebar.collapsed .sidebar-title,
         .sidebar.collapsed .new-chat-btn span,
         .sidebar.collapsed .chat-title,
-        .sidebar.collapsed .user-details span {
-            display: none;
-        }
-
-        .sidebar.collapsed .new-chat-btn {
-            justify-content: center;
-            padding: 8px;
-            height: 36px;
-            width: 36px;
-            margin: 0 auto;
-        }
-
-        .sidebar.collapsed .chat-item {
-            justify-content: center;
-            padding: 8px;
-            height: 36px;
-            width: 36px;
-            margin: 2px auto;
-        }
-
+        .sidebar.collapsed .user-details span,
+        .sidebar.collapsed .new-chat-btn,
+        .sidebar.collapsed .chat-item,
         .sidebar.collapsed .user-info {
-            justify-content: center;
-            padding: 8px;
-        }
-
-        .sidebar.collapsed .chat-menu,
-        .sidebar.collapsed .user-menu {
             display: none;
         }
 
@@ -99,8 +76,8 @@
 
         .expand-btn {
             position: absolute;
-            top: 12px;
-            left: 12px;
+            top: 16px;
+            left: 16px;
             background: none;
             border: none;
             color: #6b7280;
@@ -111,10 +88,13 @@
             transition: all 0.2s;
             z-index: 10;
             display: none;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px 0 0 8px;
         }
 
         .expand-btn:hover {
-            background-color: #e5e7eb;
+            background-color: #f3f4f6;
         }
 
         .new-chat-btn {
@@ -253,10 +233,11 @@
             cursor: pointer;
             transition: background-color 0.2s;
             height: 36px;
+            background: linear-gradient(45deg, #f3e8ff, #e9d5ff, #ddd6fe);
         }
 
         .user-info:hover {
-            background-color: #f3f4f6;
+            background: linear-gradient(45deg, #e9d5ff, #ddd6fe, #c4b5fd);
         }
 
         .user-details {
@@ -295,7 +276,7 @@
         }
 
         .user-menu-btn:hover {
-            background-color: #e5e7eb;
+            background-color: rgba(255, 255, 255, 0.5);
         }
 
         .user-menu-dropdown {
@@ -380,12 +361,6 @@
             background-color: #f3f4f6;
         }
 
-        .header-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
-
         .messages-container {
             flex: 1;
             overflow-y: auto;
@@ -450,6 +425,13 @@
             background-color: #6b7280;
             color: #ffffff;
             margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .message-content {
@@ -471,6 +453,12 @@
             color: #374151;
         }
 
+        .error-message .message-content {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
         .message-actions {
             display: flex;
             gap: 4px;
@@ -479,7 +467,8 @@
             transition: opacity 0.2s;
         }
 
-        .assistant-message:hover .message-actions {
+        .assistant-message:hover .message-actions,
+        .user-message:hover .message-actions {
             opacity: 1;
         }
 
@@ -886,31 +875,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* Уведомления */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background-color: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
-            max-width: 400px;
-        }
-
-        .api-key-input {
-            padding: 8px 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 14px;
-            width: 100%;
-            margin-bottom: 8px;
-        }
     </style>
 </head>
 <body>
@@ -971,7 +935,6 @@
                 <button class="menu-toggle" onclick="toggleSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="header-title">Renjay LLM</div>
             </div>
 
             <div class="messages-container" id="messagesContainer">
@@ -1050,9 +1013,6 @@
         </div>
     </div>
 
-    <!-- Уведомление об ошибке -->
-    <div class="notification" id="notification"></div>
-
     <script>
         let currentChatId = 1;
         let chats = {
@@ -1072,7 +1032,7 @@
         };
 
         // Groq API конфигурация
-        const GROQ_API_KEY = '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'; // Replace with your API key
+        const GROQ_API_KEY = 'YOUR_GROQ_API_KEY'; // Replace with your API key
         const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
         // Доступные модели Groq
@@ -1109,20 +1069,6 @@
                 });
             });
         });
-
-        // Показать уведомление
-        function showNotification(message, isError = true) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.backgroundColor = isError ? '#fee2e2' : '#d1fae5';
-            notification.style.color = isError ? '#dc2626' : '#059669';
-            notification.style.borderColor = isError ? '#fecaca' : '#a7f3d0';
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
 
         // Переключение боковой панели
         function toggleSidebar() {
@@ -1212,7 +1158,6 @@
                 event.target.closest('.model-option').classList.add('selected');
                 
                 document.getElementById('modelDropdown').classList.remove('show');
-                showNotification(`Model changed to: ${GROQ_MODELS[modelId].displayName}`, false);
             }
         }
 
@@ -1254,7 +1199,7 @@
             const apiKey = prompt('Enter your Groq API key:', GROQ_API_KEY);
             if (apiKey) {
                 // В реальном приложении здесь бы сохраняли API ключ
-                showNotification('API key updated', false);
+                alert('API key updated');
             }
             document.getElementById('userMenu')?.classList.remove('show');
         }
@@ -1375,10 +1320,8 @@
                 hideGeneratingEffect();
                 hideTypingIndicator();
                 
-                // Показать сообщение об ошибке
-                showNotification('Failed to send message. Please try using VPN or check your connection.', true);
-                
-                // Не добавляем fallback сообщение
+                // Добавляем сообщение об ошибке как сообщение бота
+                addErrorMessage('Failed to send message. Please try using VPN or check your connection.');
             }
         }
 
@@ -1451,41 +1394,89 @@
             if (role === 'assistant') {
                 const avatar = document.createElement('div');
                 avatar.className = 'message-avatar';
-                // В реальном приложении здесь бы использовалась картинка
-                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                // Используем картинку Ailcon.png
+                const img = document.createElement('img');
+                img.src = 'Ailcon.png';
+                img.alt = 'AI';
+                img.onerror = function() {
+                    // Fallback если картинка не загрузилась
+                    this.style.display = 'none';
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                };
+                avatar.appendChild(img);
                 messageHeader.appendChild(avatar);
             }
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            
-            // Обработка markdown-подобного форматирования
-            const formattedContent = formatMessage(content);
-            messageContent.innerHTML = formattedContent;
+            messageContent.textContent = content;
             
             messageHeader.appendChild(messageContent);
             messageBubble.appendChild(messageHeader);
             
-            // Добавить кнопки действий для сообщений ИИ
+            // Добавить кнопки действий для сообщений
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'message-actions';
+            
             if (role === 'assistant') {
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'message-actions';
-                
                 actionsDiv.innerHTML = `
                     <button class="action-btn" onclick="copyMessage(this)">
                         <i class="fas fa-copy"></i>
                         <div class="tooltip">Copy</div>
                     </button>
-                    <button class="action-btn" onclick="downloadMessage(this)">
-                        <i class="fas fa-download"></i>
-                        <div class="tooltip">Download</div>
+                    <button class="action-btn" onclick="regenerateMessage(this)">
+                        <i class="fas fa-redo"></i>
+                        <div class="tooltip">Regenerate</div>
                     </button>
                 `;
-                
-                messageBubble.appendChild(actionsDiv);
+            } else {
+                actionsDiv.innerHTML = `
+                    <button class="action-btn" onclick="copyMessage(this)">
+                        <i class="fas fa-copy"></i>
+                        <div class="tooltip">Copy</div>
+                    </button>
+                `;
             }
             
+            messageBubble.appendChild(actionsDiv);
             messageDiv.appendChild(messageBubble);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Добавление сообщения об ошибке
+        function addErrorMessage(content) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant-message error-message';
+            
+            const messageBubble = document.createElement('div');
+            messageBubble.className = 'message-bubble';
+            
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            const img = document.createElement('img');
+            img.src = 'Ailcon.png';
+            img.alt = 'AI';
+            img.onerror = function() {
+                this.style.display = 'none';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            };
+            avatar.appendChild(img);
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageHeader.appendChild(avatar);
+            messageHeader.appendChild(messageContent);
+            messageBubble.appendChild(messageHeader);
+            messageDiv.appendChild(messageBubble);
+            
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
@@ -1503,29 +1494,18 @@
             });
         }
 
-        // Скачать сообщение
-        function downloadMessage(btn) {
-            const messageContent = btn.closest('.message-bubble').querySelector('.message-content').textContent;
-            const blob = new Blob([messageContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'message.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // Форматирование сообщения
-        function formatMessage(content) {
-            // Простое форматирование для кода
-            content = content.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-            content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Перегенерировать сообщение
+        function regenerateMessage(btn) {
+            const messageDiv = btn.closest('.message');
+            const messageContent = messageDiv.querySelector('.message-content');
             
-            // Разбивка на параграфы
-            const paragraphs = content.split('\n\n');
-            return paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            // Показать индикатор загрузки
+            messageContent.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            
+            // В реальном приложении здесь бы отправлялся запрос к API
+            setTimeout(() => {
+                messageContent.textContent = 'This is a regenerated response (regenerate functionality)';
+            }, 2000);
         }
 
         // Показать индикатор печатания
@@ -1544,7 +1524,14 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
-            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            const img = document.createElement('img');
+            img.src = 'Ailcon.png';
+            img.alt = 'AI';
+            img.onerror = function() {
+                this.style.display = 'none';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            };
+            avatar.appendChild(img);
             
             const typingContent = document.createElement('div');
             typingContent.className = 'message-content';
