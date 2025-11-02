@@ -433,6 +433,11 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none;
         }
 
         .message-content {
@@ -442,6 +447,7 @@
             font-size: 15px;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
 
         .user-message .message-content {
@@ -458,6 +464,71 @@
             background-color: #fee2e2;
             color: #dc2626;
             border: 1px solid #fecaca;
+        }
+
+        /* Стили для форматированного текста */
+        .message-content strong {
+            font-weight: 700;
+        }
+
+        .message-content em {
+            font-style: italic;
+        }
+
+        .message-content code {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .message-content h1 {
+            font-size: 1.5em;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .message-content h2 {
+            font-size: 1.3em;
+        }
+
+        .message-content h3 {
+            font-size: 1.1em;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid rgba(0, 0, 0, 0.1);
+            padding-left: 16px;
+            margin: 8px 0;
+            color: #6b7280;
         }
 
         .message-actions {
@@ -1235,6 +1306,44 @@
             'yearly': { price: 1350, months: 12, discount: 25 }
         };
 
+        // Функция для форматирования текста с Markdown
+        function formatMessage(text) {
+            // Заменяем Markdown на HTML
+            let formattedText = text;
+            
+            // Жирный текст: **текст** или __текст__
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            
+            // Курсив: *текст* или _текст_
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedText = formattedText.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Встроенный код: `код`
+            formattedText = formattedText.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            // Блоки кода: ```код```
+            formattedText = formattedText.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Заголовки: # Заголовок 1, ## Заголовок 2, ### Заголовок 3
+            formattedText = formattedText.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            formattedText = formattedText.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            formattedText = formattedText.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // Списки
+            formattedText = formattedText.replace(/^\s*-\s(.*$)/gim, '<li>$1</li>');
+            formattedText = formattedText.replace(/^\s*\*\s(.*$)/gim, '<li>$1</li>');
+            formattedText = formattedText.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            
+            // Цитаты
+            formattedText = formattedText.replace(/^>\s(.*$)/gim, '<blockquote>$1</blockquote>');
+            
+            // Сохраняем переносы строк
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            return formattedText;
+        }
+
         // Инициализация Telegram Web App
         function initTelegramWebApp() {
             tg = window.Telegram.WebApp;
@@ -1661,9 +1770,17 @@
 
         // Обработка нажатия клавиш
         function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
+            if (event.key === 'Enter') {
+                if (event.ctrlKey || event.metaKey) {
+                    // Ctrl+Enter или Cmd+Enter - отправка сообщения
+                    event.preventDefault();
+                    sendMessage();
+                } else if (!event.shiftKey) {
+                    // Enter без Shift - отправка сообщения
+                    event.preventDefault();
+                    sendMessage();
+                }
+                // Shift+Enter - новая строка (стандартное поведение)
             }
         }
 
@@ -1842,6 +1959,11 @@
                 const img = document.createElement('img');
                 img.src = 'Ailcon.png';
                 img.alt = 'AI';
+                // Запрещаем скачивание иконки
+                img.oncontextmenu = function(e) {
+                    e.preventDefault();
+                    return false;
+                };
                 img.onerror = function() {
                     // Fallback если картинка не загрузилась
                     this.style.display = 'none';
@@ -1853,7 +1975,13 @@
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.textContent = content;
+            
+            // Форматируем текст с Markdown
+            if (role === 'assistant') {
+                messageContent.innerHTML = formatMessage(content);
+            } else {
+                messageContent.textContent = content;
+            }
             
             messageHeader.appendChild(messageContent);
             messageBubble.appendChild(messageHeader);
@@ -1906,6 +2034,11 @@
             const img = document.createElement('img');
             img.src = 'Ailcon.png';
             img.alt = 'AI';
+            // Запрещаем скачивание иконки
+            img.oncontextmenu = function(e) {
+                e.preventDefault();
+                return false;
+            };
             img.onerror = function() {
                 this.style.display = 'none';
                 avatar.innerHTML = '<i class="fas fa-robot"></i>';
@@ -1927,8 +2060,10 @@
 
         // Копировать сообщение
         function copyMessage(btn) {
-            const messageContent = btn.closest('.message-bubble').querySelector('.message-content').textContent;
-            navigator.clipboard.writeText(messageContent).then(() => {
+            const messageContent = btn.closest('.message-bubble').querySelector('.message-content');
+            const textToCopy = messageContent.textContent || messageContent.innerText;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 const tooltip = btn.querySelector('.tooltip');
                 const originalText = tooltip.textContent;
                 tooltip.textContent = 'Copied!';
@@ -1948,7 +2083,7 @@
             
             // В реальном приложении здесь бы отправлялся запрос к API
             setTimeout(() => {
-                messageContent.textContent = 'This is a regenerated response (regenerate functionality)';
+                messageContent.innerHTML = formatMessage('This is a regenerated response (regenerate functionality)');
             }, 2000);
         }
 
@@ -1971,6 +2106,11 @@
             const img = document.createElement('img');
             img.src = 'Ailcon.png';
             img.alt = 'AI';
+            // Запрещаем скачивание иконки
+            img.oncontextmenu = function(e) {
+                e.preventDefault();
+                return false;
+            };
             img.onerror = function() {
                 this.style.display = 'none';
                 avatar.innerHTML = '<i class="fas fa-robot"></i>';
